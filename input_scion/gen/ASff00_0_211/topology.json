@@ -1,0 +1,99 @@
+{
+  "attributes": [],
+  "isd_as": "2-ff00:0:211",
+  "mtu": 1472,
+  "test_dispatcher": true,
+  "dispatched_ports": "31000-32767",
+  "control_service": {
+    "cs2-ff00_0_211-1": {
+      "addr": "127.0.0.162:31092"
+    }
+  },
+  "discovery_service": {
+    "cs2-ff00_0_211-1": {
+      "addr": "127.0.0.162:31092"
+    }
+  },
+  "border_routers": {
+    "br2-ff00_0_211-1": {
+      "internal_addr": "127.0.0.161:31094",
+      "interfaces": {
+        "5": {
+          "underlay": {
+            "local": "[fd00:f00d:cafe::7f00:7]:50000",
+            "remote": "[fd00:f00d:cafe::7f00:6]:50000"
+          },
+          "isd_as": "1-ff00:0:111",
+          "link_to": "peer",
+          "mtu": 1472,
+          "remote_interface_id": 101
+        },
+        "6": {
+          "underlay": {
+            "local": "127.0.0.15:50000",
+            "remote": "127.0.0.14:50000"
+          },
+          "isd_as": "1-ff00:0:111",
+          "link_to": "peer",
+          "mtu": 1472,
+          "remote_interface_id": 102
+        },
+        "7": {
+          "underlay": {
+            "local": "127.0.0.37:50000",
+            "remote": "127.0.0.36:50000"
+          },
+          "isd_as": "2-ff00:0:210",
+          "link_to": "parent",
+          "mtu": 1472
+        },
+        "8": {
+          "underlay": {
+            "local": "127.0.0.39:50000",
+            "remote": "127.0.0.38:50000"
+          },
+          "isd_as": "2-ff00:0:210",
+          "link_to": "parent",
+          "mtu": 1472
+        },
+        "1": {
+          "underlay": {
+            "local": "[fd00:f00d:cafe::7f00:e]:50000",
+            "remote": "[fd00:f00d:cafe::7f00:f]:50000"
+          },
+          "isd_as": "2-ff00:0:221",
+          "link_to": "peer",
+          "mtu": 1472,
+          "remote_interface_id": 3
+        },
+        "2": {
+          "underlay": {
+            "local": "127.0.0.40:50000",
+            "remote": "127.0.0.41:50000"
+          },
+          "isd_as": "2-ff00:0:212",
+          "link_to": "child",
+          "mtu": 1472
+        },
+        "3": {
+          "underlay": {
+            "local": "127.0.0.42:50000",
+            "remote": "127.0.0.43:50000"
+          },
+          "isd_as": "2-ff00:0:212",
+          "link_to": "child",
+          "mtu": 1472
+        },
+        "4": {
+          "underlay": {
+            "local": "127.0.0.44:50000",
+            "remote": "127.0.0.45:50000"
+          },
+          "isd_as": "2-ff00:0:222",
+          "link_to": "child",
+          "mtu": 1472
+        }
+      }
+    }
+  }
+}
