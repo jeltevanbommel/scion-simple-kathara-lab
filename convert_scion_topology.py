@@ -357,6 +357,7 @@ LAB_WEB="https://netsec.ethz.ch"
 {node_name}[0]=net_0
 {node_name}[1]=net_1
 {node_name}[image]="kathara/scion-local"
+{node_name}[privileged]=true
 """
 
         # Generate startup script
@@ -364,6 +365,9 @@ LAB_WEB="https://netsec.ethz.ch"
 
 ip address add 10.0.0.{ip}/24 dev eth0
 ip address add 192.168.0.{ip}/24 dev eth1
+
+# Optional packet filter (TC eBPF + NFQUEUE)
+/shared/packet_filter/setup_filter.sh
 
 # Start SCION services
 systemctl start scion-dispatcher.service
@@ -384,6 +388,22 @@ systemctl status scion-*.service
     with open(lab_conf_path, "w") as fd:
         fd.write(labfile)
     print(f"\n✓ Generated lab.conf")
+
+
+def copy_packet_filter_assets(script_dir, dest_base):
+    filter_src = script_dir / "packet_filter"
+    filter_dst = dest_base / "shared" / "packet_filter"
+    filter_dst.parent.mkdir(parents=True, exist_ok=True)
+
+    if not filter_src.exists():
+        print("Warning: packet_filter/ not found; skipping filter assets copy")
+        return
+
+    if filter_dst.exists():
+        shutil.rmtree(filter_dst)
+
+    shutil.copytree(filter_src, filter_dst)
+    print("✓ Copied packet filter assets to shared/")
 
 
 def main():
@@ -496,6 +516,7 @@ def main():
     # Generate Kathara configuration files
     print("\nGenerating Kathara configuration files...")
     generate_kathara_configs(dest_base, as_to_node)
+    copy_packet_filter_assets(script_dir, dest_base)
 
     print("\n✓ All done! Kathara lab is ready.")
 
