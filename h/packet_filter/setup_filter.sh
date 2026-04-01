@@ -6,6 +6,7 @@ SRC="${BPF_DIR}/udp_egress.c"
 
 # Determine NFQUEUE_NUM based on hostname if not set
 QUEUE_NUM="${NFQUEUE_NUM:-$((${HOSTNAME##*_} >= 1 ? ${HOSTNAME##*_} : 10))}"
+QUEUE_DPORT="${QUEUE_DPORT:-9999}"
 
 if [ -z "${CANDIDATE_MARK:-}" ]; then
     CANDIDATE_MARK="${QUEUE_NUM}"
@@ -34,18 +35,13 @@ if [ ! -f "${OBJ}" ] || [ "${SRC}" -nt "${OBJ}" ]; then
         ${VMLINUX_INCLUDE} -c "${SRC}" -o "${OBJ}"
 fi
 
-# Attach eBPF program to cgroup egress so mark is visible to netfilter
-if [ -d /sys/fs/cgroup ]; then
-    BPFFS_DIR="/sys/fs/bpf"
-    BPFFS_PIN="${BPFFS_DIR}/udp_egress_${CANDIDATE_MARK}"
-    if [ -d "${BPFFS_DIR}" ]; then
-        rm -f "${BPFFS_PIN}"
-        bpftool prog load "${OBJ}" "${BPFFS_PIN}" type cgroup/skb
-        bpftool cgroup detach /sys/fs/cgroup cgroup_inet_egress pinned "${BPFFS_PIN}" 2>/dev/null || true
-        bpftool cgroup attach /sys/fs/cgroup cgroup_inet_egress pinned "${BPFFS_PIN}"
-    fi
+# Attach eBPF program to eth0 egress
+if ip link show eth0 >/dev/null 2>&1; then
+    tc qdisc add dev eth0 clsact 2>/dev/null || true
+    tc filter del dev eth0 egress 2>/dev/null || true
+    tc filter replace dev eth0 egress bpf da obj "${OBJ}" sec tc
 fi
-# Now set up nftables to direct marked packets to NFQUEUE
+# Now set up nftables to mark and direct UDP packets to NFQUEUE
 
 # If existing, delete nftables tables to avoid conflicts
 if nft list table inet nfqueue_filter >/dev/null 2>&1; then
@@ -56,8 +52,8 @@ if nft list table ip nfqueue_filter >/dev/null 2>&1; then
 fi
 
 nft add table ip nfqueue_filter
-nft add chain ip nfqueue_filter postrouting "{ type filter hook postrouting priority mangle ; policy accept ; }"
-nft add rule ip nfqueue_filter postrouting meta mark "${CANDIDATE_MARK}" queue num "${QUEUE_NUM}"
+nft add chain ip nfqueue_filter output "{ type filter hook output priority mangle ; policy accept ; }"
+nft add rule ip nfqueue_filter output ip protocol udp udp dport "${QUEUE_DPORT}" counter meta mark set "${CANDIDATE_MARK}" queue num "${QUEUE_NUM}"
 
 # Compile and run the NFQUEUE reader in Go
 READER="${BPF_DIR}/nfqueue_reader"

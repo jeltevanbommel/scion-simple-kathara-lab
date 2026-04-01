@@ -19,30 +19,21 @@ struct ethhdr {
 	__be16 h_proto;
 } __attribute__((packed));
 
-#ifndef ICMP_ECHO
-#define ICMP_ECHO 8
-#endif
-
-#ifndef ICMP_ECHOREPLY
-#define ICMP_ECHOREPLY 0
-#endif
-
-struct icmphdr {
-	__u8 type;
-	__u8 code;
-	__be16 checksum;
-	__be16 un_id;
-	__be16 un_sequence;
+struct udphdr {
+	__be16 source;
+	__be16 dest;
+	__be16 len;
+	__be16 check;
 } __attribute__((packed));
 
 SEC("tc")
-int icmp_egress(struct __sk_buff *skb)
+int udp_egress(struct __sk_buff *skb)
 {
     void *data = (void *)(long)skb->data;
     void *data_end = (void *)(long)skb->data_end;
     struct ethhdr *eth = data;
     struct iphdr *ip;
-    struct icmphdr *icmp;
+    struct udphdr *udp;
 
     if ((void *)(eth + 1) > data_end) {
         return TC_ACT_OK;
@@ -61,19 +52,16 @@ int icmp_egress(struct __sk_buff *skb)
         return TC_ACT_OK;
     }
 
-    if (ip->protocol != IPPROTO_ICMP) {
+    if (ip->protocol != IPPROTO_UDP) {
         return TC_ACT_OK;
     }
 
-    icmp = (void *)ip + (ip->ihl * 4);
-    if ((void *)(icmp + 1) > data_end) {
+    udp = (void *)ip + (ip->ihl * 4);
+    if ((void *)(udp + 1) > data_end) {
         return TC_ACT_OK;
     }
 
-    if (icmp->type == ICMP_ECHO) {
-        skb->mark = CANDIDATE_MARK;
-    }
-
+    skb->mark = CANDIDATE_MARK;
     return TC_ACT_OK;
 }
 

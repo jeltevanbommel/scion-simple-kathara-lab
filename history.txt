@@ -1,0 +1,117 @@
+    1  cat /var/log/udp-nfqueue.log 
+    2  //shared/packet_filter/setup_filter.sh
+    3  /shared/packet_filter/send_udp_test.sh
+    4  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+    5  ps -ef | grep nfqueue_reader | grep -v grep
+    6  nft list ruleset | sed -n '1,120p'
+    7  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+    8  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+    9  /shared/packet_filter/setup_filter.sh
+   10  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   11  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   12  sed -n '1,120p' /shared/packet_filter/setup_filter.sh
+   13  nft list ruleset | sed -n '1,120p'
+   14  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   15  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   16  /shared/packet_filter/setup_filter.sh
+   17  nft list ruleset | sed -n '1,140p'
+   18  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   19  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   20  /shared/packet_filter/setup_filter.sh
+   21  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   22  nft list ruleset | sed -n '120,220p'
+   23  grep -n 'counter' -n /shared/packet_filter/setup_filter.sh
+   24  nft -a list ruleset | sed -n '1,200p'
+   25  /shared/packet_filter/setup_filter.sh
+   26  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   27  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   28  grep -n 'queue num' /shared/packet_filter/setup_filter.sh
+   29  cat /proc/net/netfilter/nfnetlink_queue
+   30  pkill -f /shared/packet_filter/nfqueue_reader || true
+   31  /shared/packet_filter/nfqueue_reader 110
+   32  /shared/packet_filter/nfqueue_reader 110 &
+   33  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   34  /shared/packet_filter/setup_filter.sh
+   35  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   36  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   37  grep -n 'QUEUE_DPORT' /shared/packet_filter/setup_filter.sh
+   38  nft add rule inet nfqueue_filter output_mark ip protocol udp udp dport 9999 counter meta mark set 0x6e
+   39  nft -a list ruleset | sed -n '1,200p'
+   40  ps -ef | grep nfqueue_reader | grep -v grep
+   41  cat /proc/net/netfilter/nfnetlink_queue
+   42  /shared/packet_filter/setup_filter.sh
+   43  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   44  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   45  md5sum /shared/packet_filter/setup_filter.sh
+   46  nft delete table inet nfqueue_filter
+   47  nft add table inet nfqueue_filter
+   48  nft add chain inet nfqueue_filter output '{ type filter hook output priority 0 ; policy accept ; }'
+   49  nft add rule inet nfqueue_filter output ip protocol udp udp dport 9999 counter meta mark set 0x6e queue num 110
+   50  nft -a list ruleset | sed -n '1,200p'
+   51  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   52  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   53  nft delete table inet nfqueue_filter
+   54  nft add table inet nfqueue_filter
+   55  nft add chain inet nfqueue_filter output '{ type filter hook output priority mangle ; policy accept ; }'
+   56  nft add rule inet nfqueue_filter output ip protocol udp udp dport 9999 counter meta mark set 0x6e queue num 110
+   57  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   58  nft -a list ruleset | sed -n '1,120p'
+   59  ps -ef | grep nfqueue_reader | grep -v grep
+   60  cat /proc/net/netfilter/nfnetlink_queue
+   61  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   62  cat /proc/net/netfilter/nfnetlink_queue
+   63  which strace
+   64  /shared/packet_filter/setup_filter.sh
+   65  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   66  cat /proc/net/netfilter/nfnetlink_queue
+   67  grep -n 'table ip' /shared/packet_filter/setup_filter.sh
+   68  /shared/packet_filter/setup_filter.sh
+   69  nft -a list ruleset | sed -n '1,120p'
+   70  nft delete table inet nfqueue_filter 2>/dev/null || true; nft delete table ip nfqueue_filter 2>/dev/null || true
+   71  iptables -t raw -F
+   72  iptables -t raw -A OUTPUT -p udp --dport 9999 -j NFQUEUE --queue-num 110
+   73  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   74  grep -n 'src_port=555' /var/log/udp-nfqueue.log | tail
+   75  dmesg | tail -n 50
+   76  lsmod | grep nfnetlink_queue
+   77  grep nfnetlink_queue /proc/modules
+   78  ss -a -n -A netlink
+   79  ss -a -n -A netlink -p | grep 12
+   80  ls -l /proc/591/fd | head
+   81  ps -ef | grep nfqueue_reader | grep -v grep
+   82  ls -l /proc/666/fd | head
+   83  cat /proc/666/net/netlink
+   84  sysctl -a 2>/dev/null | grep nfnetlink_queue
+   85  /shared/packet_filter/setup_filter.sh
+   86  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+   87  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   88  tail -n 20 /var/log/udp-nfqueue.log
+   89  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+   90  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   91  tail -n 30 /var/log/udp-nfqueue.log
+   92  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+   93  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   94  tail -n 30 /var/log/udp-nfqueue.log
+   95  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+   96  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+   97  tail -n 50 /var/log/udp-nfqueue.log
+   98  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+   99  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+  100  tail -n 80 /var/log/udp-nfqueue.log
+  101  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+  102  tail -n 10 /var/log/udp-nfqueue.log
+  103  ls -l /shared/packet_filter/nfqueue_reader
+  104  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+  105  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+  106  tail -n 80 /var/log/udp-nfqueue.log
+  107  grep -n 'udp src_port' /var/log/udp-nfqueue.log | tail
+  108  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+  109  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+  110  tail -n 120 /var/log/udp-nfqueue.log
+  111  export NFQUEUE_DEBUG=1 NFQUEUE_RCVBUF=1048576; /shared/packet_filter/setup_filter.sh
+  112  /shared/packet_filter/send_udp_test.sh 10.0.0.112 9999
+  113  tail -n 120 /var/log/udp-nfqueue.log
+  114  clear
+  115  tail -n 120 /var/log/udp-nfqueue.log
+  116  history
+  117  history > /shared/packet_filter/history.txt
